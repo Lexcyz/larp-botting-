@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whiteboard Phantom v8.1 - Custom Refresh Delay & Cloud VM</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            900: '#05070f',
+                            800: '#0c101d',
+                            700: '#161f36',
+                            600: '#223052',
+                            accent: '#06b6d4',
+                            glow: '#22d3ee',
+                            danger: '#ef4444',
+                            success: '#10b981',
+                            warning: '#f59e0b',
+                            purple: '#a855f7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #05070f; color: #f3f4f6; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glow-box { box-shadow: 0 0 35px rgba(6, 182, 212, 0.15); }
+        .glow-purple { box-shadow: 0 0 35px rgba(168, 85, 247, 0.18); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0c101d; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #223052; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        @keyframes radar-sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .animate-radar { animation: radar-sweep 4s linear infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scrollbar overflow-x-hidden">
+
+    <header class="bg-cyber-800/90 backdrop-blur-md border-b border-cyber-700/60 sticky top-0 z-50 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                <i class="fa-solid fa-cloud-bolt text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm lg:text-base tracking-wide text-white flex items-center gap-2">
+                    WHITEBOARD PHANTOM <span class="text-[10px] px-2 py-0.5 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300 border border-cyan-500/30 rounded-full font-mono">v8.1 CUSTOM REFRESH DELAY ENGINE</span>
+                </h1>
+                <p class="text-xs text-gray-400 font-mono">Real In-Web X-Frame Bot Matrix & Custom Auto-Refresh Spawner</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <div class="hidden md:flex items-center space-x-2 bg-cyber-900/80 px-3 py-1.5 rounded-lg border border-cyber-700 text-xs font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-gray-300">Bot Grid Matrix: <span id="hdrVmStatus" class="text-cyan-400 font-semibold">Ready to Embed</span></span>
+            </div>
+            <div class="hidden lg:flex items-center space-x-2 bg-cyber-900/80 px-3 py-1.5 rounded-lg border border-cyber-700 text-xs font-mono">
+                <i class="fa-solid fa-arrows-rotate text-amber-400 animate-spin"></i>
+                <span class="text-gray-300">Refresh Cycle Count: <span id="hdrRefreshCounter" class="text-amber-400 font-bold">0</span></span>
+            </div>
+            <button onclick="openConfigModal()" class="px-3 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-gray-200 text-xs font-medium rounded-lg border border-cyber-600 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-cyan-400"></i> Advanced Settings
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Control Panel (5 Cols) -->
+        <div class="lg:col-span-5 flex flex-col space-y-6">
+            
+            <!-- Swarm & VM Deployment Card -->
+            <div class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-5 shadow-xl glow-box">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                        <i class="fa-solid fa-window-maximize"></i> Live Bot Iframe & Embed Spawner
+                    </h2>
+                    <span class="text-xs font-mono px-2 py-0.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded">In-Web Real Bot Embeds</span>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Whiteboard Link Input -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1.5">Target Whiteboard URL (X-Frame / Embed Enabled)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fa-solid fa-globe text-xs"></i>
+                            </span>
+                            <input type="text" id="boardInput" value="https://r8.whiteboardfox.com/87589141-3923-8450" 
+                                class="w-full pl-9 pr-3 py-2.5 bg-cyber-900 border border-cyber-700 rounded-xl text-sm font-mono text-gray-100 focus:outline-none focus:border-cyan-500 transition"
+                                placeholder="Paste ID or link (e.g. 87589141-3923-8450)">
+                        </div>
+                    </div>
+
+                    <!-- Bot Quantity Input & View Mode -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="text-xs font-medium text-gray-300">Embedded Bot Iframes Quantity</label>
+                            <span class="text-[11px] text-cyan-400 font-mono">Live In-App Bot Windows</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="userCountInput" min="1" max="100" value="6"
+                                class="w-full px-3 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-sm font-mono text-cyan-400 font-bold focus:outline-none focus:border-cyan-500">
+                            <button onclick="setQuickCount(2)" class="px-2.5 py-2 bg-cyber-700 hover:bg-cyber-600 rounded-xl text-xs font-mono text-gray-200 border border-cyber-600 transition">+2</button>
+                            <button onclick="setQuickCount(6)" class="px-2.5 py-2 bg-cyber-700 hover:bg-cyber-600 rounded-xl text-xs font-mono text-gray-200 border border-cyber-600 transition">+6</button>
+                            <button onclick="setQuickCount(12)" class="px-2.5 py-2 bg-purple-900/60 hover:bg-purple-800/80 rounded-xl text-xs font-mono text-purple-200 border border-purple-700 transition">+12</button>
+                        </div>
+                    </div>
+
+                    <div class="border border-cyber-700 bg-cyber-900/70 p-3.5 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-cyan-400 flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrows-rotate"></i> Bot Iframe Refresh Engine Mode
+                            </label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="autoRefreshToggle" class="sr-only peer" checked onchange="toggleAutoRefresh(this.checked)">
+                                <div class="w-9 h-5 bg-cyber-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Custom Refresh Delay Number Input & Presets -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-[11px] font-medium text-gray-300">Custom Refresh Delay (Seconds)</label>
+                                <span class="text-[10px] text-amber-400 font-mono">Set any exact delay value</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="relative flex-1">
+                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                        <i class="fa-solid fa-clock text-xs"></i>
+                                    </span>
+                                    <input type="number" id="refreshDelayInput" min="1" max="300" value="10" onchange="updateRefreshDelay(this.value)"
+                                        class="w-full pl-9 pr-3 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-xs font-mono text-amber-300 font-bold focus:outline-none focus:border-cyan-500 transition">
+                                </div>
+                                <button onclick="setRefreshPreset(5)" class="px-2 py-2 bg-cyber-700 hover:bg-cyber-600 rounded-xl text-[10px] font-mono text-gray-200 border border-cyber-600 transition">5s</button>
+                                <button onclick="setRefreshPreset(10)" class="px-2 py-2 bg-cyber-700 hover:bg-cyber-600 rounded-xl text-[10px] font-mono text-gray-200 border border-cyber-600 transition">10s</button>
+                                <button onclick="setRefreshPreset(30)" class="px-2 py-2 bg-cyber-700 hover:bg-cyber-600 rounded-xl text-[10px] font-mono text-gray-200 border border-cyber-600 transition">30s</button>
+                                <button onclick="setRefreshPreset(60)" class="px-2 py-2 bg-purple-900/60 hover:bg-purple-800/80 rounded-xl text-[10px] font-mono text-purple-200 border border-purple-700 transition">60s</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-300 mb-1">Refresh Strategy Mode</label>
+                            <select id="refreshModeSelect" class="w-full px-2.5 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-xs font-mono text-gray-200 focus:outline-none focus:border-cyan-500">
+                                <option value="all">Simultaneous (All Bot Iframes)</option>
+                                <option value="staggered">Staggered (Sequential Wave)</option>
+                                <option value="random">Randomized Bot Rejoin</option>
+                            </select>
+                        </div>
+
+                        <!-- Live Refresh Delay Countdown Progress Bar -->
+                        <div>
+                            <div class="flex justify-between text-[11px] font-mono text-gray-400 mb-1">
+                                <span>Next Bot Refresh In:</span>
+                                <span id="refreshTimerText" class="text-cyan-400 font-bold">10s</span>
+                            </div>
+                            <div class="w-full bg-cyber-900 h-2 rounded-full overflow-hidden border border-cyber-700">
+                                <div id="refreshProgressBar" class="bg-gradient-to-r from-cyan-500 to-amber-400 h-full w-full transition-all duration-1000"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VPN & Browser Spoofing Grid -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-300 mb-1">VPN Engine Node</label>
+                            <select id="vpnProtocol" class="w-full px-3 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-500">
+                                <option value="warp">1.1.1.1 Cloudflare WARP+ (Fast)</option>
+                                <option value="proton">ProtonVPN Free Mesh Node</option>
+                                <option value="express">ExpressVPN High-Speed Tunnel</option>
+                                <option value="mullvad">Mullvad Anonymous Proxy</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-300 mb-1">Bot Viewport Layout</label>
+                            <select id="gridColsSelect" onchange="changeGridCols(this.value)" class="w-full px-3 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-xs font-mono text-gray-200 focus:outline-none focus:border-cyan-500">
+                                <option value="grid-cols-1 md:grid-cols-2">2 Columns Grid View</option>
+                                <option value="grid-cols-2 lg:grid-cols-3" selected>3 Columns Matrix View</option>
+                                <option value="grid-cols-2 lg:grid-cols-4">4 Columns Compact Grid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cloud VM Action Buttons -->
+                    <div class="pt-2 flex gap-3">
+                        <button id="startBtn" onclick="startCloudVmSwarm()" class="flex-1 py-3.5 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:opacity-95 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/25 transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-network-wired"></i> Launch Embedded Bot Matrix
+                        </button>
+                        <button id="manualRefreshBtn" onclick="triggerManualBotRefresh()" class="px-3 py-3.5 bg-amber-600/80 hover:bg-amber-500 text-white font-medium rounded-xl border border-amber-500/50 transition flex items-center justify-center gap-1.5 text-xs">
+                            <i class="fa-solid fa-rotate-right"></i> Refresh Now
+                        </button>
+                        <button id="stopBtn" onclick="stopSwarm()" disabled class="px-4 py-3.5 bg-cyber-700/50 text-gray-500 font-semibold rounded-xl border border-cyber-700 transition flex items-center justify-center gap-2 text-sm cursor-not-allowed">
+                            <i class="fa-solid fa-stop"></i> Abort
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Execution Logs -->
+            <div class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-cyan-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-terminal"></i> Bot Refresh & Matrix Stream Log
+                </h3>
+                
+                <div class="flex-1 bg-cyber-900 rounded-xl border border-cyber-700 p-3 font-mono text-xs overflow-y-auto max-h-48 custom-scrollbar" id="logTerminal">
+                    <div class="text-emerald-400">[System] In-Web Live Bot Iframe Matrix Engine Initialized.</div>
+                    <div class="text-gray-400">[Embed Mode] Bots open directly in responsive web frames (X-Frame enabled).</div>
+                    <div class="text-amber-400">[Refresh Loop] Custom delay auto-refresh engine active.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col space-y-6">
+            
+            <!-- Live Bot Iframe Embed Viewport Matrix -->
+            <div class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-4 shadow-xl flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-200 flex items-center gap-2">
+                            <i class="fa-solid fa-display text-cyan-400"></i> Embedded Live Bot Views (<span id="matrixActiveCount">0</span> Viewports)
+                        </h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span id="connectionBadge" class="text-xs px-2.5 py-0.5 rounded-full font-mono bg-gray-700 text-gray-300">Offline</span>
+                        <button onclick="refreshAllBotIframes()" class="text-gray-400 hover:text-cyan-400 text-xs px-2.5 py-1 bg-cyber-900 rounded-lg border border-cyber-700 transition flex items-center gap-1">
+                            <i class="fa-solid fa-arrows-rotate text-xs"></i> Reload Matrix
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Grid Container for Multiple Bot Iframes -->
+                <div class="relative w-full flex-1 min-h-[460px] max-h-[620px] bg-cyber-900 rounded-xl overflow-y-auto p-3 border border-cyber-700 custom-scrollbar" id="iframeGridWrapper">
+                    
+                    <div id="iframeGridContainer" class="grid grid-cols-2 lg:grid-cols-3 gap-3 w-full">
+                        <!-- Embedded Bot Iframes rendered dynamically here -->
+                    </div>
+
+                    <!-- Offline State Overlay -->
+                    <div id="offlineOverlay" class="absolute inset-0 bg-cyber-900/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-cyber-800 border border-cyber-700 flex items-center justify-center mb-3 text-cyan-400 text-2xl shadow-xl">
+                            <i class="fa-solid fa-window-restore"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-1">Embedded Real Bot Web Viewports Ready</h3>
+                        <p class="text-xs text-gray-400 max-w-sm mb-4">Set target whiteboard URL, choose bot iframe count, configure your custom refresh delay timer, then click "Launch Embedded Bot Matrix".</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-cyber-800/90 border border-cyber-700/80 rounded-2xl p-4 shadow-xl flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                        <i class="fa-solid fa-network-wired"></i> Embedded Bot Session Metrics
+                    </h3>
+                    <div class="flex items-center space-x-3 text-xs font-mono">
+                        <span class="text-emerald-400">Iframes Live: <span id="statConnectedCount">0</span></span>
+                        <span class="text-amber-400">Refreshes Done: <span id="statRefreshCount">0</span></span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto flex-1 max-h-40 custom-scrollbar">
+                    <table class="w-full text-left text-xs font-mono">
+                        <thead class="bg-cyber-900 text-gray-400 uppercase tracking-wider sticky top-0">
+                            <tr>
+                                <th class="p-2.5">Bot Iframe #</th>
+                                <th class="p-2.5">Embed Session URL / Token</th>
+                                <th class="p-2.5">Refresh Counter</th>
+                                <th class="p-2.5">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vmTableBody" class="divide-y divide-cyber-700/50 text-gray-300">
+                            <tr>
+                                <td colspan="4" class="p-4 text-center text-gray-500">No embedded bot iframes active. Click "Launch Embedded Bot Matrix".</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="configModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cyber-800 border border-cyber-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-cyan-400"></i> Cloud Cluster Configuration
+                </h3>
+                <button onclick="closeConfigModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-xs font-mono">
+                <div>
+                    <label class="block font-medium text-gray-300 mb-1">Primary WireGuard Gateway</label>
+                    <input type="text" value="warp.cloudflare.com:2408 (Encrypted Mesh)" class="w-full px-3 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-gray-200">
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-300 mb-1">Humanizer Mouse Jitter (px)</label>
+                    <input type="number" value="12" class="w-full px-3 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-gray-200">
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-300 mb-1">Batch Spawn Rate (ms per 50 bots)</label>
+                    <input type="number" id="batchRateInput" value="250" class="w-full px-3 py-2 bg-cyber-900 border border-cyber-700 rounded-xl text-gray-200">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeConfigModal()" class="px-4 py-2 bg-cyber-700 hover:bg-cyber-600 text-white rounded-xl transition font-medium text-xs">Save & Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isSwarmActive = false;
+        let activeBotIframes = [];
+        let autoRefreshEnabled = true;
+        let refreshDelaySeconds = 10;
+        let currentCountdown = 10;
+        let refreshTimerInterval = null;
+        let totalRefreshCount = 0;
+        let gridColsClass = "grid-cols-2 lg:grid-cols-3";
+
+        function setQuickCount(count) {
+            const input = document.getElementById('userCountInput');
+            input.value = Math.min(100, count);
+        }
+
+        function setRefreshPreset(seconds) {
+            document.getElementById('refreshDelayInput').value = seconds;
+            updateRefreshDelay(seconds);
+        }
+
+        function updateRefreshDelay(val) {
+            const parsed = parseInt(val);
+            if (!isNaN(parsed) && parsed > 0) {
+                refreshDelaySeconds = parsed;
+                currentCountdown = refreshDelaySeconds;
+                appendLog(`[Config] Refresh delay updated to ${refreshDelaySeconds} seconds.`, 'cyan');
+                if (isSwarmActive && autoRefreshEnabled) {
+                    resetRefreshTimer();
+                }
+            }
+        }
+
+        function changeGridCols(cols) {
+            gridColsClass = cols;
+            const container = document.getElementById('iframeGridContainer');
+            if (container) {
+                container.className = `grid ${cols} gap-3 w-full`;
+            }
+        }
+
+        function toggleAutoRefresh(enabled) {
+            autoRefreshEnabled = enabled;
+            appendLog(`Auto-refresh engine ${enabled ? 'ENABLED' : 'DISABLED'}`, enabled ? 'success' : 'warning');
+            if (!enabled && refreshTimerInterval) {
+                clearInterval(refreshTimerInterval);
+                document.getElementById('refreshTimerText').innerText = 'Paused';
+            } else if (enabled && isSwarmActive) {
+                resetRefreshTimer();
+            }
+        }
+
+        function openConfigModal() { document.getElementById('configModal').classList.remove('hidden'); }
+        function closeConfigModal() { document.getElementById('configModal').classList.add('hidden'); }
+
+        function appendLog(msg, type = 'info') {
+            const terminal = document.getElementById('logTerminal');
+            const div = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            let colorClass = 'text-gray-300';
+            if (type === 'success') colorClass = 'text-emerald-400';
+            if (type === 'warning') colorClass = 'text-amber-400';
+            if (type === 'error') colorClass = 'text-red-400';
+            if (type === 'cyan') colorClass = 'text-cyan-400';
+            
+            div.className = colorClass;
+            div.innerHTML = `<span class="text-gray-500">[${timestamp}]</span> ${msg}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function parseWhiteboardUrl(input) {
+            input = input.trim();
+            if (!input) return 'https://r8.whiteboardfox.com/87589141-3923-8450';
+            if (input.startsWith('http://') || input.startsWith('https://')) return input;
+            return `https://r8.whiteboardfox.com/${input}`;
+        }
+
+        /* Deploy Embedded Bot Matrix with Live Iframes */
+        function startCloudVmSwarm() {
+            if (isSwarmActive) return;
+            isSwarmActive = true;
+
+            const targetUrl = parseWhiteboardUrl(document.getElementById('boardInput').value);
+            const iframeCount = parseInt(document.getElementById('userCountInput').value) || 6;
+            
+            // Read custom refresh delay from number input
+            refreshDelaySeconds = parseInt(document.getElementById('refreshDelayInput').value) || 10;
+            currentCountdown = refreshDelaySeconds;
+
+            // UI updates
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').className = 'flex-1 py-3.5 bg-cyber-700/50 text-gray-500 font-semibold rounded-xl border border-cyber-700 cursor-not-allowed flex items-center justify-center gap-2 text-sm';
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('stopBtn').className = 'px-4 py-3.5 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2 text-sm cursor-pointer';
+
+            document.getElementById('offlineOverlay').classList.add('hidden');
+
+            const badge = document.getElementById('connectionBadge');
+            badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            badge.innerText = `Matrix Active (${iframeCount} Bot Iframes)`;
+
+            appendLog(`[Iframe Spawner] Spawning ${iframeCount} real in-web bot viewports for target: ${targetUrl}`, 'cyan');
+
+            activeBotIframes = [];
+            const gridContainer = document.getElementById('iframeGridContainer');
+            gridContainer.className = `grid ${gridColsClass} gap-3 w-full`;
+            gridContainer.innerHTML = '';
+
+            for (let i = 0; i < iframeCount; i++) {
+                const botId = `BOT_IFRAME_${i + 1}`;
+                const embedTokenUrl = targetUrl.includes('?') 
+                    ? `${targetUrl}&bot_embed=${i + 1}&t=${Date.now()}` 
+                    : `${targetUrl}?bot_embed=${i + 1}&t=${Date.now()}`;
+
+                // Create iframe wrapper element
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bg-cyber-900 border border-cyber-700 rounded-xl overflow-hidden flex flex-col shadow-lg transition hover:border-cyan-500/50';
+                wrapper.innerHTML = `
+                    <div class="bg-cyber-800 px-2.5 py-1.5 flex items-center justify-between border-b border-cyber-700 text-[10px] font-mono">
+                        <span class="font-bold text-cyan-400 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ${botId}
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <span id="refBadge_${i}" class="text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30">Refreshed: 0</span>
+                            <button onclick="reloadSingleIframe(${i})" class="text-gray-400 hover:text-cyan-300 text-[10px]">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-[180px]">
+                        <iframe id="botIframe_${i}" src="${embedTokenUrl}" class="w-full h-full border-0 opacity-90 hover:opacity-100 transition"></iframe>
+                    </div>
+                `;
+
+                gridContainer.appendChild(wrapper);
+
+                activeBotIframes.push({
+                    id: botId,
+                    url: embedTokenUrl,
+                    refreshes: 0
+                });
+            }
+
+            document.getElementById('matrixActiveCount').innerText = activeBotIframes.length;
+            document.getElementById('statConnectedCount').innerText = activeBotIframes.length;
+            updateVmTable();
+
+            appendLog(`[Matrix] Rendered ${iframeCount} embedded live bot viewports in web layout.`, 'success');
+
+            // Start auto refresh loop with custom delay timer
+            if (autoRefreshEnabled) {
+                resetRefreshTimer();
+            }
+        }
+
+        /* Auto-Refresh Timer Engine with Custom Delay Countdown */
+        function resetRefreshTimer() {
+            if (refreshTimerInterval) clearInterval(refreshTimerInterval);
+            
+            refreshDelaySeconds = parseInt(document.getElementById('refreshDelayInput').value) || 10;
+            currentCountdown = refreshDelaySeconds;
+
+            refreshTimerInterval = setInterval(() => {
+                if (!isSwarmActive || !autoRefreshEnabled) {
+                    clearInterval(refreshTimerInterval);
+                    return;
+                }
+
+                currentCountdown--;
+                
+                // Update progress bar & UI countdown text
+                const percent = (currentCountdown / refreshDelaySeconds) * 100;
+                document.getElementById('refreshProgressBar').style.width = `${percent}%`;
+                document.getElementById('refreshTimerText').innerText = `${currentCountdown}s`;
+
+                if (currentCountdown <= 0) {
+                    triggerBotMatrixRefresh();
+                    currentCountdown = refreshDelaySeconds;
+                }
+            }, 1000);
+        }
+
+        function triggerBotMatrixRefresh() {
+            const mode = document.getElementById('refreshModeSelect').value;
+            const targetBaseUrl = parseWhiteboardUrl(document.getElementById('boardInput').value);
+
+            appendLog(`[Auto-Refresh Engine] Triggering bot matrix refresh cycle (Mode: ${mode.toUpperCase()})...`, 'cyan');
+
+            if (mode === 'all') {
+                activeBotIframes.forEach((bot, index) => {
+                    reloadSingleIframe(index);
+                });
+            } else if (mode === 'staggered') {
+                activeBotIframes.forEach((bot, index) => {
+                    setTimeout(() => {
+                        reloadSingleIframe(index);
+                    }, index * 400);
+                });
+            } else if (mode === 'random') {
+                const randomIndex = Math.floor(Math.random() * activeBotIframes.length);
+                reloadSingleIframe(randomIndex);
+            }
+
+            totalRefreshCount++;
+            document.getElementById('hdrRefreshCounter').innerText = totalRefreshCount;
+            document.getElementById('statRefreshCount').innerText = totalRefreshCount;
+        }
+
+        function triggerManualBotRefresh() {
+            if (!isSwarmActive) {
+                appendLog('Launch embedded bot matrix first before refreshing!', 'warning');
+                return;
+            }
+            triggerBotMatrixRefresh();
+            resetRefreshTimer();
+        }
+
+        function reloadSingleIframe(index) {
+            const iframe = document.getElementById(`botIframe_${index}`);
+            if (iframe && activeBotIframes[index]) {
+                const targetBaseUrl = parseWhiteboardUrl(document.getElementById('boardInput').value);
+                const updatedUrl = targetBaseUrl.includes('?') 
+                    ? `${targetBaseUrl}&bot_embed=${index + 1}&refresh=${Date.now()}` 
+                    : `${targetBaseUrl}?bot_embed=${index + 1}&refresh=${Date.now()}`;
+                
+                iframe.src = updatedUrl;
+                activeBotIframes[index].refreshes++;
+                activeBotIframes[index].url = updatedUrl;
+
+                const badge = document.getElementById(`refBadge_${index}`);
+                if (badge) badge.innerText = `Refreshed: ${activeBotIframes[index].refreshes}`;
+
+                updateVmTable();
+            }
+        }
+
+        function refreshAllBotIframes() {
+            if (!isSwarmActive) return;
+            triggerBotMatrixRefresh();
+        }
+
+        function updateVmTable() {
+            const tbody = document.getElementById('vmTableBody');
+            tbody.innerHTML = '';
+            activeBotIframes.forEach((bot, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-cyber-700/30 transition';
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold text-cyan-400">${bot.id}</td>
+                    <td class="p-2.5 font-mono text-gray-400 truncate max-w-[200px]">${bot.url}</td>
+                    <td class="p-2.5 text-amber-400 font-bold">${bot.refreshes} times</td>
+                    <td class="p-2.5"><span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] border border-emerald-500/30">Embedded Live</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function stopSwarm() {
+            if (!isSwarmActive) return;
+            isSwarmActive = false;
+            if (refreshTimerInterval) clearInterval(refreshTimerInterval);
+
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').className = 'flex-1 py-3.5 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:opacity-95 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/25 transition flex items-center justify-center gap-2 text-sm cursor-pointer';
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('stopBtn').className = 'px-4 py-3.5 bg-cyber-700/50 text-gray-500 font-semibold rounded-xl border border-cyber-700 transition flex items-center justify-center gap-2 text-sm cursor-not-allowed';
+
+            document.getElementById('iframeGridContainer').innerHTML = '';
+            document.getElementById('offlineOverlay').classList.remove('hidden');
+
+            const badge = document.getElementById('connectionBadge');
+            badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-mono bg-gray-700 text-gray-300';
+            badge.innerText = 'Offline';
+
+            document.getElementById('matrixActiveCount').innerText = '0';
+            document.getElementById('statConnectedCount').innerText = '0';
+
+            document.getElementById('vmTableBody').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Embedded bot matrix stopped. Viewports cleared.</td></tr>`;
+
+            appendLog('Embedded bot matrix stopped.', 'warning');
+        }
+    </script>
+</body>
+                                                                                                                         </html>
